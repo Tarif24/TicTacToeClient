@@ -14,6 +14,9 @@ public class NetworkClient : MonoBehaviour
     const ushort NetworkPort = 54321;
     const string IPAddress = "173.206.9.47";
 
+    [SerializeField]
+    GameObject UIController;
+
     void Start()
     {
         networkDriver = NetworkDriver.Create();
@@ -110,6 +113,30 @@ public class NetworkClient : MonoBehaviour
 
         DataStreamWriter streamWriter;
         networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(buffer.Length);
+        streamWriter.WriteBytes(buffer);
+        networkDriver.EndSend(streamWriter);
+
+        buffer.Dispose();
+    }
+
+    public void SendUsernameAndPasswordToServer()
+    {
+        string loginInfo = UIController.GetComponent<UIController>().GetUsernameFromInput() + "," + UIController.GetComponent<UIController>().GetPasswordFromInput();
+
+        byte[] msgAsByteArray = Encoding.Unicode.GetBytes(loginInfo);
+        NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
+
+        DataStreamWriter streamWriter;
+        networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        if (UIController.GetComponent<UIController>().isNewAccount)
+        {
+            streamWriter.WriteInt(DataSignifiers.AccountSignup);
+        }
+        else
+        {
+            streamWriter.WriteInt(DataSignifiers.AccountSignin);
+        }
         streamWriter.WriteInt(buffer.Length);
         streamWriter.WriteBytes(buffer);
         networkDriver.EndSend(streamWriter);
