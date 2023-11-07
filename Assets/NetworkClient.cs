@@ -11,8 +11,8 @@ public class NetworkClient : MonoBehaviour
     NetworkConnection networkConnection;
     NetworkPipeline reliableAndInOrderPipeline;
     NetworkPipeline nonReliableNotInOrderedPipeline;
-    const ushort NetworkPort = 9001;
-    const string IPAddress = "192.168.1.10";
+    const ushort NetworkPort = 54321;
+    const string IPAddress = "173.206.9.47";
 
     void Start()
     {
