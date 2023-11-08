@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 public class UIController : MonoBehaviour
 {
-   
+    [SerializeField]
     GameObject usernameInputField;
-   
+    //[SerializeField]
     GameObject passwordInputField;
 
     public bool isNewAccount;
@@ -47,6 +48,5 @@ public class UIController : MonoBehaviour
     {
 
         return passwordInputField.GetComponentsInChildren<Text>()[1].text;
-
     }
 }

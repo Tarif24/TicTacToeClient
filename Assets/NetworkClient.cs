@@ -12,7 +12,7 @@ public class NetworkClient : MonoBehaviour
     NetworkPipeline reliableAndInOrderPipeline;
     NetworkPipeline nonReliableNotInOrderedPipeline;
     const ushort NetworkPort = 54321;
-    const string IPAddress = "173.206.9.47";
+    const string IPAddress = "192.168.1.6";
 
     [SerializeField]
     GameObject UIController;
@@ -113,6 +113,7 @@ public class NetworkClient : MonoBehaviour
 
         DataStreamWriter streamWriter;
         networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(DataSignifiers.Message);
         streamWriter.WriteInt(buffer.Length);
         streamWriter.WriteBytes(buffer);
         networkDriver.EndSend(streamWriter);
