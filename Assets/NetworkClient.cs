@@ -17,6 +17,11 @@ public class NetworkClient : MonoBehaviour
     [SerializeField]
     GameObject UIController;
 
+    [SerializeField]
+    GameObject LoginPage;
+    [SerializeField]
+    GameObject GameScene;
+
     void Start()
     {
         networkDriver = NetworkDriver.Create();
@@ -162,11 +167,19 @@ public class NetworkClient : MonoBehaviour
         if (loginResponse[0] == "YES")
         {
             Debug.Log("Change to play scene");
+            LoginPage.SetActive(false);
+            GameScene.SetActive(true);
         }
         else if (loginResponse[0] == "NO")
         {
             Debug.Log("Look at server messages");
         }
+    }
+
+    public void LogOut()
+    {
+        LoginPage.SetActive(true);
+        GameScene.SetActive(false);
     }
 
 }
