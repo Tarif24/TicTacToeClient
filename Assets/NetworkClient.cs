@@ -74,12 +74,20 @@ public class NetworkClient : MonoBehaviour
                     Debug.Log("We are now connected to the server");
                     break;
                 case NetworkEvent.Type.Data:
+                    int dataSignifier = streamReader.ReadInt();
+
                     int sizeOfDataBuffer = streamReader.ReadInt();
                     NativeArray<byte> buffer = new NativeArray<byte>(sizeOfDataBuffer, Allocator.Persistent);
                     streamReader.ReadBytes(buffer);
                     byte[] byteBuffer = buffer.ToArray();
                     string msg = Encoding.Unicode.GetString(byteBuffer);
-                    ProcessReceivedMsg(msg);
+                    //ProcessReceivedMsg(msg);
+
+                    if (dataSignifier == DataSignifiers.ServerLoginResponse)
+                    {
+                        ProcessServerLoginResponse(msg);
+                    }
+
                     buffer.Dispose();
                     break;
                 case NetworkEvent.Type.Disconnect:
@@ -143,6 +151,22 @@ public class NetworkClient : MonoBehaviour
         networkDriver.EndSend(streamWriter);
 
         buffer.Dispose();
+    }
+
+    public void ProcessServerLoginResponse(string response)
+    {
+        string[] loginResponse = response.Split(',');
+
+        ProcessReceivedMsg(loginResponse[1]);
+
+        if (loginResponse[0] == "YES")
+        {
+            Debug.Log("Change to play scene");
+        }
+        else if (loginResponse[0] == "NO")
+        {
+            Debug.Log("Look at server messages");
+        }
     }
 
 }
