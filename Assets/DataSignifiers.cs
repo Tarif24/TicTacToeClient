@@ -10,3 +10,5 @@ static public class DataSignifiers
     public const int Message = 3;
     public const int ServerLoginResponse = 4;
 }
+
+public enum GameStates { Login, EnterGameID, LookingForPlayer, PlayerMove, OpponentMove, Win, Lose };

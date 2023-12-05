@@ -15,12 +15,7 @@ public class NetworkClient : MonoBehaviour
     const string IPAddress = "192.168.1.6";
 
     [SerializeField]
-    GameObject UIController;
-
-    [SerializeField]
-    GameObject LoginPage;
-    [SerializeField]
-    GameObject GameScene;
+    UIController uiController;
 
     void Start()
     {
@@ -136,14 +131,14 @@ public class NetworkClient : MonoBehaviour
 
     public void SendUsernameAndPasswordToServer()
     {
-        string loginInfo = UIController.GetComponent<UIController>().GetUsernameFromInput() + "," + UIController.GetComponent<UIController>().GetPasswordFromInput();
+        string loginInfo = uiController.GetUsernameFromInput() + "," + uiController.GetPasswordFromInput();
 
         byte[] msgAsByteArray = Encoding.Unicode.GetBytes(loginInfo);
         NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
 
         DataStreamWriter streamWriter;
         networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
-        if (UIController.GetComponent<UIController>().isNewAccount)
+        if (uiController.isNewAccount)
         {
             streamWriter.WriteInt(DataSignifiers.AccountSignup);
         }
@@ -167,8 +162,7 @@ public class NetworkClient : MonoBehaviour
         if (loginResponse[0] == "YES")
         {
             Debug.Log("Change to play scene");
-            LoginPage.SetActive(false);
-            GameScene.SetActive(true);
+            uiController.SetGameState(GameStates.EnterGameID);
         }
         else if (loginResponse[0] == "NO")
         {
@@ -178,8 +172,7 @@ public class NetworkClient : MonoBehaviour
 
     public void LogOut()
     {
-        LoginPage.SetActive(true);
-        GameScene.SetActive(false);
+        uiController.SetGameState(GameStates.Login);
     }
 
 }
