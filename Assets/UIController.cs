@@ -9,8 +9,9 @@ public class UIController : MonoBehaviour
 {
     GameObject usernameInputField;
     GameObject passwordInputField;
+    GameObject gameIDInputField;
 
-    public GameStates gameState;
+    GameStates gameState;
 
     [SerializeField]
     GameObject loginPage;
@@ -19,15 +20,15 @@ public class UIController : MonoBehaviour
     [SerializeField]
     GameObject lookingForPlayer;
     [SerializeField]
-    GameObject playerMove;
-    [SerializeField]
-    GameObject opponentMove;
+    GameObject game;
     [SerializeField]
     GameObject win;
     [SerializeField]
     GameObject lose;
 
     public bool isNewAccount;
+
+    public string currentGameID;
 
     private void Start()
     {
@@ -41,6 +42,8 @@ public class UIController : MonoBehaviour
                 usernameInputField = (GameObject)go;
             else if (go.name == "PasswordInputField")
                 passwordInputField = (GameObject)go;
+            else if (go.name == "GameIDInputField")
+                gameIDInputField = (GameObject)go;
         }
     }
 
@@ -67,6 +70,12 @@ public class UIController : MonoBehaviour
         return passwordInputField.GetComponentsInChildren<Text>()[1].text;
     }
 
+    public string GetGameIDFromInput()
+    {
+
+        return gameIDInputField.GetComponentsInChildren<Text>()[1].text;
+    }
+
     public void SetGameState(GameStates state)
     {
         gameState = state;
@@ -77,8 +86,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(true);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
-                playerMove.SetActive(false);
-                opponentMove.SetActive(false);
+                game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
                 break;
@@ -87,8 +95,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(false);
                 enterGameID.SetActive(true);
                 lookingForPlayer.SetActive(false);
-                playerMove.SetActive(false);
-                opponentMove.SetActive(false);
+                game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
                 break;
@@ -97,8 +104,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(true);
-                playerMove.SetActive(false);
-                opponentMove.SetActive(false);
+                game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
                 break;
@@ -107,8 +113,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
-                playerMove.SetActive(true);
-                opponentMove.SetActive(false);
+                game.SetActive(true);
                 win.SetActive(false);
                 lose.SetActive(false);
                 break;
@@ -117,8 +122,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
-                playerMove.SetActive(false);
-                opponentMove.SetActive(true);
+                game.SetActive(true);
                 win.SetActive(false);
                 lose.SetActive(false);
                 break;
@@ -127,8 +131,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
-                playerMove.SetActive(false);
-                opponentMove.SetActive(false);
+                game.SetActive(false);
                 win.SetActive(true);
                 lose.SetActive(false);
                 break;
@@ -137,8 +140,7 @@ public class UIController : MonoBehaviour
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
-                playerMove.SetActive(false);
-                opponentMove.SetActive(false);
+                game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(true);
                 break;

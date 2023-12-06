@@ -76,19 +76,31 @@ public class NetworkClient : MonoBehaviour
                 case NetworkEvent.Type.Data:
                     int dataSignifier = streamReader.ReadInt();
 
-                    int sizeOfDataBuffer = streamReader.ReadInt();
-                    NativeArray<byte> buffer = new NativeArray<byte>(sizeOfDataBuffer, Allocator.Persistent);
-                    streamReader.ReadBytes(buffer);
-                    byte[] byteBuffer = buffer.ToArray();
-                    string msg = Encoding.Unicode.GetString(byteBuffer);
-                    //ProcessReceivedMsg(msg);
-
-                    if (dataSignifier == DataSignifiers.ServerLoginResponse)
+                    switch (dataSignifier)
                     {
-                        ProcessServerLoginResponse(msg);
+                        case DataSignifiers.ServerLoginResponse:
+                            int sizeOfDataBuffer = streamReader.ReadInt();
+                            NativeArray<byte> buffer = new NativeArray<byte>(sizeOfDataBuffer, Allocator.Persistent);
+                            streamReader.ReadBytes(buffer);
+                            byte[] byteBuffer = buffer.ToArray();
+                            string msg = Encoding.Unicode.GetString(byteBuffer);
+                            buffer.Dispose();
+
+                            ProcessServerLoginResponse(msg);
+                            break;
+
+                        case DataSignifiers.ServerGameIDResponse:
+                            int gameState = streamReader.ReadInt();
+
+                            ProcessServerGameIDResponse(gameState);
+                            break;
+                        case DataSignifiers.ServerGameRoomKick:
+                            ProcessServerGameRoomKick();
+                            break;
+
                     }
 
-                    buffer.Dispose();
+                    
                     break;
                 case NetworkEvent.Type.Disconnect:
                     Debug.Log("Client has disconnected from server");
@@ -153,6 +165,27 @@ public class NetworkClient : MonoBehaviour
         buffer.Dispose();
     }
 
+    public void SendGameID()
+    {
+        string gameID = uiController.GetGameIDFromInput();
+
+        byte[] msgAsByteArray = Encoding.Unicode.GetBytes(gameID);
+        NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
+
+        DataStreamWriter streamWriter;
+        networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(DataSignifiers.GameID);
+        streamWriter.WriteInt(buffer.Length);
+        streamWriter.WriteBytes(buffer);
+        networkDriver.EndSend(streamWriter);
+
+        buffer.Dispose();
+
+        uiController.SetGameState(GameStates.LookingForPlayer);
+
+        uiController.currentGameID = gameID;
+    }
+
     public void ProcessServerLoginResponse(string response)
     {
         string[] loginResponse = response.Split(',');
@@ -173,6 +206,46 @@ public class NetworkClient : MonoBehaviour
     public void LogOut()
     {
         uiController.SetGameState(GameStates.Login);
+    }
+
+    public void ProcessServerGameIDResponse(int gameState)
+    {
+        if (gameState == (int)GameStates.LookingForPlayer)
+        {
+            uiController.SetGameState((GameStates)gameState);
+        }
+        else if (gameState == (int)GameStates.PlayerMove)
+        {
+            uiController.SetGameState((GameStates)gameState);
+        }
+        else if (gameState == (int)GameStates.OpponentMove)
+        {
+            uiController.SetGameState((GameStates)gameState);
+        }
+    }
+
+    public void SendBackOut()
+    {
+        string gameID = uiController.currentGameID;
+
+        byte[] msgAsByteArray = Encoding.Unicode.GetBytes(gameID);
+        NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
+
+        DataStreamWriter streamWriter;
+        networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(DataSignifiers.BackOut);
+        streamWriter.WriteInt(buffer.Length);
+        streamWriter.WriteBytes(buffer);
+        networkDriver.EndSend(streamWriter);
+
+        buffer.Dispose();
+
+        uiController.SetGameState(GameStates.EnterGameID);
+    }
+
+    public void ProcessServerGameRoomKick()
+    {
+        uiController.SetGameState(GameStates.EnterGameID);
     }
 
 }
