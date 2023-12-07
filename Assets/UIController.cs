@@ -76,6 +76,11 @@ public class UIController : MonoBehaviour
         return gameIDInputField.GetComponentsInChildren<Text>()[1].text;
     }
 
+    public GameStates GetGameState()
+    {
+        return gameState;
+    }
+
     public void SetGameState(GameStates state)
     {
         gameState = state;

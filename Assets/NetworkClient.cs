@@ -38,8 +38,10 @@ public class NetworkClient : MonoBehaviour
     {
         #region Check Input and Send Msg
 
-        if (Input.GetKeyDown(KeyCode.A))
-            SendMessageToServer("Hello server's world, sincerely your network client");
+        if ((uiController.GetGameState() == GameStates.PlayerMove || uiController.GetGameState() == GameStates.OpponentMove) && Input.GetKeyDown(KeyCode.A))
+        {
+            SendMessageToOpponent("Hello Opponent");
+        }    
 
         #endregion
 
@@ -63,10 +65,10 @@ public class NetworkClient : MonoBehaviour
 
         while (PopNetworkEventAndCheckForData(out networkEventType, out streamReader, out pipelineUsedToSendEvent))
         {
-            if (pipelineUsedToSendEvent == reliableAndInOrderPipeline)
-                Debug.Log("Network event from: reliableAndInOrderPipeline");
-            else if (pipelineUsedToSendEvent == nonReliableNotInOrderedPipeline)
-                Debug.Log("Network event from: nonReliableNotInOrderedPipeline");
+            //if (pipelineUsedToSendEvent == reliableAndInOrderPipeline)
+            //    Debug.Log("Network event from: reliableAndInOrderPipeline");
+            //else if (pipelineUsedToSendEvent == nonReliableNotInOrderedPipeline)
+            //    Debug.Log("Network event from: nonReliableNotInOrderedPipeline");
 
             switch (networkEventType)
             {
@@ -94,8 +96,24 @@ public class NetworkClient : MonoBehaviour
 
                             ProcessServerGameIDResponse(gameState);
                             break;
+
                         case DataSignifiers.ServerGameRoomKick:
                             ProcessServerGameRoomKick();
+                            break;
+
+                        case DataSignifiers.ServerSendToLookingForPlayer:
+                            ProcessServerSendToLookingForPlayer();
+                            break;
+
+                        case DataSignifiers.MessageToOpponent:
+                            int sizeOfDataBuffer2 = streamReader.ReadInt();
+                            NativeArray<byte> buffer2 = new NativeArray<byte>(sizeOfDataBuffer2, Allocator.Persistent);
+                            streamReader.ReadBytes(buffer2);
+                            byte[] byteBuffer2 = buffer2.ToArray();
+                            string msg2 = Encoding.Unicode.GetString(byteBuffer2);
+                            buffer2.Dispose();
+
+                            ProcessMessageFromOpponent(msg2);
                             break;
 
                     }
@@ -210,18 +228,7 @@ public class NetworkClient : MonoBehaviour
 
     public void ProcessServerGameIDResponse(int gameState)
     {
-        if (gameState == (int)GameStates.LookingForPlayer)
-        {
-            uiController.SetGameState((GameStates)gameState);
-        }
-        else if (gameState == (int)GameStates.PlayerMove)
-        {
-            uiController.SetGameState((GameStates)gameState);
-        }
-        else if (gameState == (int)GameStates.OpponentMove)
-        {
-            uiController.SetGameState((GameStates)gameState);
-        }
+        uiController.SetGameState((GameStates)gameState);
     }
 
     public void SendBackOut()
@@ -248,5 +255,31 @@ public class NetworkClient : MonoBehaviour
         uiController.SetGameState(GameStates.EnterGameID);
     }
 
+    public void ProcessServerSendToLookingForPlayer()
+    {
+        uiController.SetGameState(GameStates.LookingForPlayer);
+    }
+
+    public void SendMessageToOpponent(string msg)
+    {
+        string temp = uiController.currentGameID + ',' + msg;
+
+        byte[] msgAsByteArray = Encoding.Unicode.GetBytes(temp);
+        NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
+
+        DataStreamWriter streamWriter;
+        networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(DataSignifiers.MessageToOpponent);
+        streamWriter.WriteInt(buffer.Length);
+        streamWriter.WriteBytes(buffer);
+        networkDriver.EndSend(streamWriter);
+
+        buffer.Dispose();
+    }
+
+    public void ProcessMessageFromOpponent(string msg)
+    {
+        Debug.Log(msg);
+    }
 }
 
