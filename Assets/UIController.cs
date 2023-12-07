@@ -30,6 +30,11 @@ public class UIController : MonoBehaviour
 
     public string currentGameID;
 
+    public List<Text[]> TicTacToeGrid;
+    public Text[] TopRow = new Text[3]; 
+    public Text[] MidRow = new Text[3]; 
+    public Text[] BotRow = new Text[3]; 
+
     private void Start()
     {
         SetGameState(GameStates.Login);
@@ -45,6 +50,11 @@ public class UIController : MonoBehaviour
             else if (go.name == "GameIDInputField")
                 gameIDInputField = (GameObject)go;
         }
+
+        TicTacToeGrid = new List<Text[]>();
+        TicTacToeGrid.Add(TopRow);
+        TicTacToeGrid.Add(MidRow);
+        TicTacToeGrid.Add(BotRow);
     }
 
     public void LoginButton()
