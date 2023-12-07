@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
+//using UnityEngine.UIElements;
 
 public class UIController : MonoBehaviour
 {
@@ -30,14 +30,23 @@ public class UIController : MonoBehaviour
 
     public string currentGameID;
 
-    public List<Text[]> TicTacToeGrid;
-    public Text[] TopRow = new Text[3]; 
-    public Text[] MidRow = new Text[3]; 
-    public Text[] BotRow = new Text[3]; 
+    List<Button[]> TicTacToeGrid = new List<Button[]>();
+    public Button[] TopRow = new Button[3];
+    public Button[] MidRow = new Button[3];
+    public Button[] BotRow = new Button[3];
+
+    public string marker = "X";
+    public bool didWin = false;
 
     private void Start()
     {
-        SetGameState(GameStates.Login);
+        SetGameState(GameStates.PlayerMove);
+
+        TicTacToeGrid.Add(TopRow);
+        TicTacToeGrid.Add(MidRow);
+        TicTacToeGrid.Add(BotRow);
+
+        BoardReset();
 
         Object[] GameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
 
@@ -50,11 +59,14 @@ public class UIController : MonoBehaviour
             else if (go.name == "GameIDInputField")
                 gameIDInputField = (GameObject)go;
         }
+    }
 
-        TicTacToeGrid = new List<Text[]>();
-        TicTacToeGrid.Add(TopRow);
-        TicTacToeGrid.Add(MidRow);
-        TicTacToeGrid.Add(BotRow);
+    private void Update()
+    {
+        if (didWin)
+        {
+            Debug.Log("Win");
+        }
     }
 
     public void LoginButton()
@@ -163,6 +175,73 @@ public class UIController : MonoBehaviour
             default:
                 break;
 
+        }
+    }
+
+    public void BoardReset()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                TicTacToeGrid[i][j].interactable = true;
+                TicTacToeGrid[i][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text = " ";
+            }
+        }
+    }
+
+    public void CheckForWin()
+    {
+        bool win = false;
+
+        // Check rows
+        for (int i = 0; i < 3; i++)
+        {
+            if (TicTacToeGrid[i][0].GetComponentsInChildren<TextMeshProUGUI>()[0].text != " " &&
+            TicTacToeGrid[i][0].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[i][1].GetComponentsInChildren<TextMeshProUGUI>()[0].text &&
+            TicTacToeGrid[i][1].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[i][2].GetComponentsInChildren<TextMeshProUGUI>()[0].text)
+            {
+                win = true;
+            }
+        }
+
+        // Check columns
+        for (int j = 0; j < 3; j++)
+        {
+            if (TicTacToeGrid[0][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text != " " &&
+            TicTacToeGrid[0][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[1][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text &&
+            TicTacToeGrid[1][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[2][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text)
+            {
+                win = true;
+            }
+        }
+
+        if (TicTacToeGrid[0][0].GetComponentsInChildren<TextMeshProUGUI>()[0].text != " " &&
+            TicTacToeGrid[0][0].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[1][1].GetComponentsInChildren<TextMeshProUGUI>()[0].text &&
+            TicTacToeGrid[1][1].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[2][2].GetComponentsInChildren<TextMeshProUGUI>()[0].text)
+        {
+            win = true;
+        }
+
+        if (TicTacToeGrid[0][2].GetComponentsInChildren<TextMeshProUGUI>()[0].text != " " && 
+            TicTacToeGrid[0][2].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[1][1].GetComponentsInChildren<TextMeshProUGUI>()[0].text && 
+            TicTacToeGrid[1][1].GetComponentsInChildren<TextMeshProUGUI>()[0].text == TicTacToeGrid[2][0].GetComponentsInChildren<TextMeshProUGUI>()[0].text)
+        {
+            win = true;
+        }
+
+        didWin = win;
+    }
+
+    public void FlipMarker()
+    {
+        if (marker == "X")
+        {
+            marker = "O";
+        }
+        else
+        {
+            marker = "X";
         }
     }
 }
