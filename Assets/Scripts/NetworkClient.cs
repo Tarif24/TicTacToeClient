@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Networking.Transport;
 using System.Text;
 using Unity.Networking.Transport.Relay;
+using TMPro;
 
 public class NetworkClient : MonoBehaviour
 {
@@ -36,15 +37,6 @@ public class NetworkClient : MonoBehaviour
 
     void Update()
     {
-        #region Check Input and Send Msg
-
-        if ((uiController.GetGameState() == GameStates.PlayerMove || uiController.GetGameState() == GameStates.OpponentMove) && Input.GetKeyDown(KeyCode.A))
-        {
-            SendMessageToOpponent("Hello Opponent");
-        }    
-
-        #endregion
-
         networkDriver.ScheduleUpdate().Complete();
 
         #region Check for client to server connection
@@ -56,6 +48,11 @@ public class NetworkClient : MonoBehaviour
         }
 
         #endregion
+
+        if (uiController.didSelect)
+        {
+            SendSelectionToOpponent();
+        }
 
         #region Manage Network Events
 
@@ -94,7 +91,14 @@ public class NetworkClient : MonoBehaviour
                         case DataSignifiers.ServerGameIDResponse:
                             int gameState = streamReader.ReadInt();
 
-                            ProcessServerGameIDResponse(gameState);
+                            int sizeOfDataBuffer3 = streamReader.ReadInt();
+                            NativeArray<byte> buffer3 = new NativeArray<byte>(sizeOfDataBuffer3, Allocator.Persistent);
+                            streamReader.ReadBytes(buffer3);
+                            byte[] byteBuffer3 = buffer3.ToArray();
+                            string marker = Encoding.Unicode.GetString(byteBuffer3);
+                            buffer3.Dispose();
+
+                            ProcessServerGameIDResponse(gameState, marker);
                             break;
 
                         case DataSignifiers.ServerGameRoomKick:
@@ -114,6 +118,13 @@ public class NetworkClient : MonoBehaviour
                             buffer2.Dispose();
 
                             ProcessMessageFromOpponent(msg2);
+                            break;
+
+                        case DataSignifiers.SelectionToOpponent:
+                            int x = streamReader.ReadInt();
+                            int y = streamReader.ReadInt();
+                            int outcome = streamReader.ReadInt();
+                            ProcessSelectionFromOpponent(x, y, outcome);
                             break;
 
                     }
@@ -212,7 +223,6 @@ public class NetworkClient : MonoBehaviour
 
         if (loginResponse[0] == "YES")
         {
-            Debug.Log("Change to play scene");
             uiController.SetGameState(GameStates.EnterGameID);
         }
         else if (loginResponse[0] == "NO")
@@ -226,8 +236,9 @@ public class NetworkClient : MonoBehaviour
         uiController.SetGameState(GameStates.Login);
     }
 
-    public void ProcessServerGameIDResponse(int gameState)
+    public void ProcessServerGameIDResponse(int gameState, string marker)
     {
+        uiController.marker = marker;
         uiController.SetGameState((GameStates)gameState);
     }
 
@@ -280,6 +291,95 @@ public class NetworkClient : MonoBehaviour
     public void ProcessMessageFromOpponent(string msg)
     {
         Debug.Log(msg);
+    }
+
+    public void SendSelectionToOpponent()
+    {
+        uiController.SetGameState(GameStates.OpponentMove);
+
+        int x = 0;
+        int y = 0;
+        int outcome = 0;
+
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (uiController.TicTacToeGrid[i][j] == uiController.lastButtonClicked)
+                {
+                    x = i;
+                    y = j;
+                    uiController.didSelect = false;
+                    break;
+                }
+            }
+        }
+
+        string temp = uiController.currentGameID;
+
+        byte[] msgAsByteArray = Encoding.Unicode.GetBytes(temp);
+        NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
+
+        DataStreamWriter streamWriter;
+        networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(DataSignifiers.SelectionToOpponent);
+        streamWriter.WriteInt(buffer.Length);
+        streamWriter.WriteBytes(buffer);
+        streamWriter.WriteInt(x);
+        streamWriter.WriteInt(y);
+
+        if (uiController.didWin)
+        {
+            outcome = 1;
+            uiController.SetGameState(GameStates.Win);
+        }
+        else if (uiController.isDraw)
+        {
+            uiController.SetGameState(GameStates.Draw);
+            outcome = 2;
+        }
+
+        streamWriter.WriteInt(outcome);
+        networkDriver.EndSend(streamWriter);
+
+        buffer.Dispose();
+    }
+
+    public void ProcessSelectionFromOpponent(int x, int y, int outcome)
+    {
+        uiController.SetGameState(GameStates.PlayerMove);
+
+        if (uiController.marker == "X")
+        {
+            uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "O";
+        }
+        else
+        {
+            uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "X";
+        }
+
+        uiController.TicTacToeGrid[x][y].interactable = false;
+
+        if (outcome == 1)
+        {
+            uiController.SetGameState(GameStates.Lose);
+        }
+        else if (outcome == 2)
+        {
+            uiController.SetGameState(GameStates.Draw);
+        }
+    }
+
+    public void SendChatMessage()
+    {
+        if (uiController.GetGameState() == GameStates.PlayerMove || uiController.GetGameState() == GameStates.OpponentMove)
+        {
+            string temp = uiController.GetChatTextFromInput();
+
+            SendMessageToOpponent(temp);
+
+            uiController.SetBlankChatTextFromInput();
+        }
     }
 }
 

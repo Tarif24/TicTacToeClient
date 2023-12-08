@@ -10,6 +10,7 @@ public class UIController : MonoBehaviour
     GameObject usernameInputField;
     GameObject passwordInputField;
     GameObject gameIDInputField;
+    GameObject chatInputField;
 
     GameStates gameState;
 
@@ -25,22 +26,27 @@ public class UIController : MonoBehaviour
     GameObject win;
     [SerializeField]
     GameObject lose;
+    [SerializeField]
+    GameObject draw;
 
     public bool isNewAccount;
 
     public string currentGameID;
 
-    List<Button[]> TicTacToeGrid = new List<Button[]>();
+    public List<Button[]> TicTacToeGrid = new List<Button[]>();
     public Button[] TopRow = new Button[3];
     public Button[] MidRow = new Button[3];
     public Button[] BotRow = new Button[3];
 
     public string marker = "X";
     public bool didWin = false;
+    public bool isDraw = false;
+    public Button lastButtonClicked = null;
+    public bool didSelect = false;
 
     private void Start()
     {
-        SetGameState(GameStates.PlayerMove);
+        SetGameState(GameStates.Login);
 
         TicTacToeGrid.Add(TopRow);
         TicTacToeGrid.Add(MidRow);
@@ -58,6 +64,8 @@ public class UIController : MonoBehaviour
                 passwordInputField = (GameObject)go;
             else if (go.name == "GameIDInputField")
                 gameIDInputField = (GameObject)go;
+            else if (go.name == "ChatInputField")
+                chatInputField = (GameObject)go;
         }
     }
 
@@ -98,6 +106,17 @@ public class UIController : MonoBehaviour
         return gameIDInputField.GetComponentsInChildren<Text>()[1].text;
     }
 
+    public string GetChatTextFromInput()
+    {
+
+        return chatInputField.GetComponentsInChildren<Text>()[1].text;
+    }
+
+    public void SetBlankChatTextFromInput()
+    {
+        chatInputField.GetComponentsInChildren<Text>()[1].text = "";
+    }
+
     public GameStates GetGameState()
     {
         return gameState;
@@ -116,6 +135,7 @@ public class UIController : MonoBehaviour
                 game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
+                draw.SetActive(false);
                 break;
 
             case GameStates.EnterGameID:
@@ -125,6 +145,7 @@ public class UIController : MonoBehaviour
                 game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
+                draw.SetActive(false);
                 break;
 
             case GameStates.LookingForPlayer:
@@ -134,6 +155,8 @@ public class UIController : MonoBehaviour
                 game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
+                draw.SetActive(false);
+                BoardReset();
                 break;
 
             case GameStates.PlayerMove:
@@ -143,6 +166,7 @@ public class UIController : MonoBehaviour
                 game.SetActive(true);
                 win.SetActive(false);
                 lose.SetActive(false);
+                draw.SetActive(false);
                 break;
 
             case GameStates.OpponentMove:
@@ -152,27 +176,20 @@ public class UIController : MonoBehaviour
                 game.SetActive(true);
                 win.SetActive(false);
                 lose.SetActive(false);
+                draw.SetActive(false);
+
                 break;
 
             case GameStates.Win:
-                loginPage.SetActive(false);
-                enterGameID.SetActive(false);
-                lookingForPlayer.SetActive(false);
-                game.SetActive(false);
                 win.SetActive(true);
-                lose.SetActive(false);
                 break;
 
             case GameStates.Lose:
-                loginPage.SetActive(false);
-                enterGameID.SetActive(false);
-                lookingForPlayer.SetActive(false);
-                game.SetActive(false);
-                win.SetActive(false);
                 lose.SetActive(true);
                 break;
 
-            default:
+            case GameStates.Draw:
+                draw.SetActive(true);
                 break;
 
         }
@@ -188,8 +205,12 @@ public class UIController : MonoBehaviour
                 TicTacToeGrid[i][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text = " ";
             }
         }
-    }
 
+        didWin = false;
+        isDraw = false;
+        didSelect = false;
+    }
+        
     public void CheckForWin()
     {
         bool win = false;
@@ -233,15 +254,19 @@ public class UIController : MonoBehaviour
         didWin = win;
     }
 
-    public void FlipMarker()
+    public void CheckForDraw()
     {
-        if (marker == "X")
+        isDraw = true;
+
+        for (int i = 0; i < 3; i++)
         {
-            marker = "O";
-        }
-        else
-        {
-            marker = "X";
+            for (int j = 0; j < 3; j++)
+            {
+                if (TicTacToeGrid[i][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text == " ")
+                {
+                    isDraw = false;
+                }
+            }
         }
     }
 }

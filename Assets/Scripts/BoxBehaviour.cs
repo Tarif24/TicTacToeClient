@@ -11,7 +11,19 @@ public class BoxBehaviour : MonoBehaviour
 
     public void OnBoxClicked()
     {
-        button.interactable = false;
-        button.GetComponentsInChildren<TextMeshProUGUI>()[0].text = uiController.marker;
+        if (uiController.GetGameState() == GameStates.PlayerMove)
+        {
+            button.interactable = false;
+            button.GetComponentsInChildren<TextMeshProUGUI>()[0].text = uiController.marker;
+            uiController.CheckForWin();
+            if (!uiController.didWin)
+            {
+                uiController.CheckForDraw();
+            }
+            uiController.lastButtonClicked = GetComponent<Button>();
+            uiController.didSelect = true;
+        }
     }
+
+
 }
