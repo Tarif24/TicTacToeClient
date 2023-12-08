@@ -28,6 +28,8 @@ public class UIController : MonoBehaviour
     GameObject lose;
     [SerializeField]
     GameObject draw;
+    [SerializeField]
+    GameObject finish;
 
     public bool isNewAccount;
 
@@ -43,6 +45,10 @@ public class UIController : MonoBehaviour
     public bool isDraw = false;
     public Button lastButtonClicked = null;
     public bool didSelect = false;
+
+    public GameObject textBox;
+    public Transform chatLocation;
+    public Canvas canvas;
 
     private void Start()
     {
@@ -112,11 +118,6 @@ public class UIController : MonoBehaviour
         return chatInputField.GetComponentsInChildren<Text>()[1].text;
     }
 
-    public void SetBlankChatTextFromInput()
-    {
-        chatInputField.GetComponentsInChildren<Text>()[1].text = "";
-    }
-
     public GameStates GetGameState()
     {
         return gameState;
@@ -177,7 +178,16 @@ public class UIController : MonoBehaviour
                 win.SetActive(false);
                 lose.SetActive(false);
                 draw.SetActive(false);
+                break;
 
+            case GameStates.Observer:
+                loginPage.SetActive(false);
+                enterGameID.SetActive(false);
+                lookingForPlayer.SetActive(false);
+                game.SetActive(true);
+                win.SetActive(false);
+                lose.SetActive(false);
+                draw.SetActive(false);
                 break;
 
             case GameStates.Win:
@@ -190,6 +200,10 @@ public class UIController : MonoBehaviour
 
             case GameStates.Draw:
                 draw.SetActive(true);
+                break;
+
+            case GameStates.Finish:
+                finish.SetActive(true);
                 break;
 
         }
@@ -268,5 +282,16 @@ public class UIController : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void DisplayChatMessage(string msg)
+    {
+        GameObject temp = Instantiate(textBox, chatLocation.position, Quaternion.identity);
+
+        temp.GetComponent<TextMeshProUGUI>().text = msg;
+
+        temp.transform.SetParent(canvas.transform);
+
+        Destroy(temp, 5);
     }
 }

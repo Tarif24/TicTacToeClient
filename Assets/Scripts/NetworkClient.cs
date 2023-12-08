@@ -62,11 +62,6 @@ public class NetworkClient : MonoBehaviour
 
         while (PopNetworkEventAndCheckForData(out networkEventType, out streamReader, out pipelineUsedToSendEvent))
         {
-            //if (pipelineUsedToSendEvent == reliableAndInOrderPipeline)
-            //    Debug.Log("Network event from: reliableAndInOrderPipeline");
-            //else if (pipelineUsedToSendEvent == nonReliableNotInOrderedPipeline)
-            //    Debug.Log("Network event from: nonReliableNotInOrderedPipeline");
-
             switch (networkEventType)
             {
                 case NetworkEvent.Type.Connect:
@@ -124,7 +119,15 @@ public class NetworkClient : MonoBehaviour
                             int x = streamReader.ReadInt();
                             int y = streamReader.ReadInt();
                             int outcome = streamReader.ReadInt();
-                            ProcessSelectionFromOpponent(x, y, outcome);
+
+                            int sizeOfDataBuffer4 = streamReader.ReadInt();
+                            NativeArray<byte> buffer4 = new NativeArray<byte>(sizeOfDataBuffer4, Allocator.Persistent);
+                            streamReader.ReadBytes(buffer4);
+                            byte[] byteBuffer4 = buffer4.ToArray();
+                            string marker2 = Encoding.Unicode.GetString(byteBuffer4);
+                            buffer4.Dispose();
+
+                            ProcessSelectionFromOpponent(x, y, outcome, marker2);
                             break;
 
                     }
@@ -291,6 +294,7 @@ public class NetworkClient : MonoBehaviour
     public void ProcessMessageFromOpponent(string msg)
     {
         Debug.Log(msg);
+        uiController.DisplayChatMessage(msg);
     }
 
     public void SendSelectionToOpponent()
@@ -345,28 +349,41 @@ public class NetworkClient : MonoBehaviour
         buffer.Dispose();
     }
 
-    public void ProcessSelectionFromOpponent(int x, int y, int outcome)
+    public void ProcessSelectionFromOpponent(int x, int y, int outcome, string marker)
     {
-        uiController.SetGameState(GameStates.PlayerMove);
-
-        if (uiController.marker == "X")
+        if (uiController.GetGameState() != GameStates.Observer)
         {
-            uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "O";
+            uiController.SetGameState(GameStates.PlayerMove);
+
+            if (uiController.marker == "X")
+            {
+                uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "O";
+            }
+            else
+            {
+                uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "X";
+            }
+
+            uiController.TicTacToeGrid[x][y].interactable = false;
+
+            if (outcome == 1)
+            {
+                uiController.SetGameState(GameStates.Lose);
+            }
+            else if (outcome == 2)
+            {
+                uiController.SetGameState(GameStates.Draw);
+            }
         }
         else
         {
-            uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "X";
-        }
+            uiController.TicTacToeGrid[x][y].GetComponentsInChildren<TextMeshProUGUI>()[0].text = marker;
+            uiController.TicTacToeGrid[x][y].interactable = false;
 
-        uiController.TicTacToeGrid[x][y].interactable = false;
-
-        if (outcome == 1)
-        {
-            uiController.SetGameState(GameStates.Lose);
-        }
-        else if (outcome == 2)
-        {
-            uiController.SetGameState(GameStates.Draw);
+            if (outcome == 1 || outcome == 2)
+            {
+                uiController.SetGameState(GameStates.Finish);
+            }
         }
     }
 
@@ -377,8 +394,6 @@ public class NetworkClient : MonoBehaviour
             string temp = uiController.GetChatTextFromInput();
 
             SendMessageToOpponent(temp);
-
-            uiController.SetBlankChatTextFromInput();
         }
     }
 }
