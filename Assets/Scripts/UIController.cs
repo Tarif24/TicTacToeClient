@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-//using UnityEngine.UIElements;
 
 public class UIController : MonoBehaviour
 {
@@ -49,6 +48,8 @@ public class UIController : MonoBehaviour
     public GameObject textBox;
     public Transform chatLocation;
     public Canvas canvas;
+    public GameObject textBoxLogin;
+    public Transform loginTextLocation;
 
     private void Start()
     {
@@ -72,14 +73,6 @@ public class UIController : MonoBehaviour
                 gameIDInputField = (GameObject)go;
             else if (go.name == "ChatInputField")
                 chatInputField = (GameObject)go;
-        }
-    }
-
-    private void Update()
-    {
-        if (didWin)
-        {
-            Debug.Log("Win");
         }
     }
 
@@ -132,11 +125,6 @@ public class UIController : MonoBehaviour
             case GameStates.Login:
                 loginPage.SetActive(true);
                 enterGameID.SetActive(false);
-                lookingForPlayer.SetActive(false);
-                game.SetActive(false);
-                win.SetActive(false);
-                lose.SetActive(false);
-                draw.SetActive(false);
                 break;
 
             case GameStates.EnterGameID:
@@ -147,27 +135,24 @@ public class UIController : MonoBehaviour
                 win.SetActive(false);
                 lose.SetActive(false);
                 draw.SetActive(false);
+                finish.SetActive(false);
                 break;
 
             case GameStates.LookingForPlayer:
-                loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(true);
                 game.SetActive(false);
                 win.SetActive(false);
                 lose.SetActive(false);
                 draw.SetActive(false);
+                finish.SetActive(false);
                 BoardReset();
                 break;
 
             case GameStates.PlayerMove:
-                loginPage.SetActive(false);
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
                 game.SetActive(true);
-                win.SetActive(false);
-                lose.SetActive(false);
-                draw.SetActive(false);
                 break;
 
             case GameStates.OpponentMove:
@@ -175,19 +160,12 @@ public class UIController : MonoBehaviour
                 enterGameID.SetActive(false);
                 lookingForPlayer.SetActive(false);
                 game.SetActive(true);
-                win.SetActive(false);
-                lose.SetActive(false);
-                draw.SetActive(false);
                 break;
 
             case GameStates.Observer:
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
-                lookingForPlayer.SetActive(false);
                 game.SetActive(true);
-                win.SetActive(false);
-                lose.SetActive(false);
-                draw.SetActive(false);
                 break;
 
             case GameStates.Win:
@@ -287,6 +265,17 @@ public class UIController : MonoBehaviour
     public void DisplayChatMessage(string msg)
     {
         GameObject temp = Instantiate(textBox, chatLocation.position, Quaternion.identity);
+
+        temp.GetComponent<TextMeshProUGUI>().text = msg;
+
+        temp.transform.SetParent(canvas.transform);
+
+        Destroy(temp, 5);
+    }
+
+    public void DisplayLoginMessage(string msg)
+    {
+        GameObject temp = Instantiate(textBoxLogin, loginTextLocation.position, Quaternion.identity);
 
         temp.GetComponent<TextMeshProUGUI>().text = msg;
 

@@ -37,6 +37,11 @@ public class NetworkClient : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            Debug.Log(uiController.GetGameState());
+        }
+
         networkDriver.ScheduleUpdate().Complete();
 
         #region Check for client to server connection
@@ -222,15 +227,11 @@ public class NetworkClient : MonoBehaviour
     {
         string[] loginResponse = response.Split(',');
 
-        ProcessReceivedMsg(loginResponse[1]);
+        uiController.DisplayLoginMessage(loginResponse[1]);
 
         if (loginResponse[0] == "YES")
         {
             uiController.SetGameState(GameStates.EnterGameID);
-        }
-        else if (loginResponse[0] == "NO")
-        {
-            Debug.Log("Look at server messages");
         }
     }
 
