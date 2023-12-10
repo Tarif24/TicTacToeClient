@@ -165,6 +165,7 @@ public class UIController : MonoBehaviour
             case GameStates.Observer:
                 loginPage.SetActive(false);
                 enterGameID.SetActive(false);
+                lookingForPlayer.SetActive(false);
                 game.SetActive(true);
                 break;
 

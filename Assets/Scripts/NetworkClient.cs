@@ -5,6 +5,7 @@ using Unity.Networking.Transport;
 using System.Text;
 using Unity.Networking.Transport.Relay;
 using TMPro;
+using System.Collections.Generic;
 
 public class NetworkClient : MonoBehaviour
 {
@@ -133,6 +134,28 @@ public class NetworkClient : MonoBehaviour
                             buffer4.Dispose();
 
                             ProcessSelectionFromOpponent(x, y, outcome, marker2);
+                            break;
+
+                        case DataSignifiers.AllSelectionsToObserver:
+                            ProcessSelectionsToObserver();
+                            break;
+
+                        case DataSignifiers.AllSelectionsToObserverFinal:
+
+                            List<int[]> allSelections = new List<int[]>();
+
+                            while (streamReader.ReadInt() == 1)
+                            {
+                                int[] temp = new int[3];
+
+                                temp[0] = streamReader.ReadInt();
+                                temp[1] = streamReader.ReadInt();
+                                temp[2] = streamReader.ReadInt();
+
+                                allSelections.Add(temp);
+                            }
+
+                            ProcessSelectionsToObserverFinal(allSelections);
                             break;
 
                     }
@@ -395,6 +418,69 @@ public class NetworkClient : MonoBehaviour
             string temp = uiController.GetChatTextFromInput();
 
             SendMessageToOpponent(temp);
+        }
+    }
+
+    public void ProcessSelectionsToObserver()
+    {
+        SendAllSelectionsToServer();
+    }
+
+    public void SendAllSelectionsToServer()
+    {
+        string temp = uiController.currentGameID;
+
+        byte[] msgAsByteArray = Encoding.Unicode.GetBytes(temp);
+        NativeArray<byte> buffer = new NativeArray<byte>(msgAsByteArray, Allocator.Persistent);
+
+        DataStreamWriter streamWriter;
+        networkDriver.BeginSend(reliableAndInOrderPipeline, networkConnection, out streamWriter);
+        streamWriter.WriteInt(DataSignifiers.AllSelectionsToObserver);
+        streamWriter.WriteInt(buffer.Length);
+        streamWriter.WriteBytes(buffer);
+
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (uiController.TicTacToeGrid[i][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text != " ")
+                {
+                    streamWriter.WriteInt(1);
+                    streamWriter.WriteInt(i);
+                    streamWriter.WriteInt(j);
+                    if (uiController.TicTacToeGrid[i][j].GetComponentsInChildren<TextMeshProUGUI>()[0].text == "X")
+                    {
+                        streamWriter.WriteInt(0);
+                    }
+                    else
+                    {
+                        streamWriter.WriteInt(1);
+                    }
+                }
+            }
+        }
+
+        streamWriter.WriteInt(0);
+
+        networkDriver.EndSend(streamWriter);
+
+        buffer.Dispose();
+    }
+
+    public void ProcessSelectionsToObserverFinal(List<int[]> allSelections)
+    {
+        foreach (int[] s in allSelections)
+        {
+            if (s[2] == 0)
+            {
+                uiController.TicTacToeGrid[s[0]][s[1]].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "X";
+            }
+            else
+            {
+                uiController.TicTacToeGrid[s[0]][s[1]].GetComponentsInChildren<TextMeshProUGUI>()[0].text = "O";
+            }
+
+            uiController.TicTacToeGrid[s[0]][s[1]].interactable = false;
         }
     }
 }
