@@ -38,11 +38,6 @@ public class NetworkClient : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            Debug.Log(uiController.GetGameState());
-        }
-
         networkDriver.ScheduleUpdate().Complete();
 
         #region Check for client to server connection
@@ -317,7 +312,6 @@ public class NetworkClient : MonoBehaviour
 
     public void ProcessMessageFromOpponent(string msg)
     {
-        Debug.Log(msg);
         uiController.DisplayChatMessage(msg);
     }
 
