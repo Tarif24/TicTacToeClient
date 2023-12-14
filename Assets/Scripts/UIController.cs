@@ -6,53 +6,12 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
-    GameObject usernameInputField;
-    GameObject passwordInputField;
-    GameObject gameIDInputField;
-    GameObject chatInputField;
-
-    GameStates gameState;
-
-    [SerializeField]
-    GameObject loginPage;
-    [SerializeField]
-    GameObject enterGameID;
-    [SerializeField]
-    GameObject lookingForPlayer;
-    [SerializeField]
-    GameObject game;
-    [SerializeField]
-    GameObject win;
-    [SerializeField]
-    GameObject lose;
-    [SerializeField]
-    GameObject draw;
-    [SerializeField]
-    GameObject finish;
-
-    public bool isNewAccount;
-
     public string currentGameID;
-
-    public List<Button[]> TicTacToeGrid = new List<Button[]>();
-    public Button[] TopRow = new Button[3];
-    public Button[] MidRow = new Button[3];
-    public Button[] BotRow = new Button[3];
-
-    public string marker = "X";
-    public bool didWin = false;
-    public bool isDraw = false;
     public Button lastButtonClicked = null;
-    public bool didSelect = false;
-
-    public GameObject textBox;
-    public Transform chatLocation;
-    public Canvas canvas;
-    public GameObject textBoxLogin;
-    public Transform loginTextLocation;
 
     private void Start()
     {
+        NetworkClientProcessing.SetUIController(this);
         SetGameState(GameStates.Login);
 
         TicTacToeGrid.Add(TopRow);
@@ -76,15 +35,35 @@ public class UIController : MonoBehaviour
         }
     }
 
+    #region Login Processing Helper Functions
+
+    public bool isNewAccount;
+
     public void LoginButton()
     {
         isNewAccount = false;
+        SendUsernameAndPasswordToServer();
     }
 
     public void CreateAccountButton()
     {
         isNewAccount = true;
+        SendUsernameAndPasswordToServer();
     }
+
+    public void LogOut()
+    {
+        SetGameState(GameStates.Login);
+    }
+
+    #endregion
+
+    #region Input Field Helper Functions
+
+    GameObject usernameInputField;
+    GameObject passwordInputField;
+    GameObject gameIDInputField;
+    GameObject chatInputField;
 
     public string GetUsernameFromInput()
     {
@@ -110,6 +89,29 @@ public class UIController : MonoBehaviour
 
         return chatInputField.GetComponentsInChildren<Text>()[1].text;
     }
+
+    #endregion
+
+    #region GameState/UI Controller
+
+    GameStates gameState;
+
+    [SerializeField]
+    GameObject loginPage;
+    [SerializeField]
+    GameObject enterGameID;
+    [SerializeField]
+    GameObject lookingForPlayer;
+    [SerializeField]
+    GameObject game;
+    [SerializeField]
+    GameObject win;
+    [SerializeField]
+    GameObject lose;
+    [SerializeField]
+    GameObject draw;
+    [SerializeField]
+    GameObject finish;
 
     public GameStates GetGameState()
     {
@@ -188,6 +190,19 @@ public class UIController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Check Board State Functions and Board Helper Functions
+
+    public List<Button[]> TicTacToeGrid = new List<Button[]>();
+    public Button[] TopRow = new Button[3];
+    public Button[] MidRow = new Button[3];
+    public Button[] BotRow = new Button[3];
+
+    public string marker = "X";
+    public bool didWin = false;
+    public bool isDraw = false;
+
     public void BoardReset()
     {
         for (int i = 0; i < 3; i++)
@@ -201,7 +216,6 @@ public class UIController : MonoBehaviour
 
         didWin = false;
         isDraw = false;
-        didSelect = false;
     }
         
     public void CheckForWin()
@@ -263,6 +277,16 @@ public class UIController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region On Screen Messages
+
+    public GameObject textBox;
+    public Transform chatLocation;
+    public Canvas canvas;
+    public GameObject textBoxLogin;
+    public Transform loginTextLocation;
+
     public void DisplayChatMessage(string msg)
     {
         GameObject temp = Instantiate(textBox, chatLocation.position, Quaternion.identity);
@@ -284,4 +308,30 @@ public class UIController : MonoBehaviour
 
         Destroy(temp, 5);
     }
+
+    #endregion
+
+    #region Send Game Data To Server Functions
+
+    public void SendUsernameAndPasswordToServer()
+    {
+        NetworkClientProcessing.SendUsernameAndPasswordToServer();
+    }
+
+    public void SendGameID()
+    {
+        NetworkClientProcessing.SendGameID();
+    }
+
+    public void SendBackOut() 
+    {
+        NetworkClientProcessing.SendBackOut();
+    }
+
+    public void SendChatMessage()
+    {
+        NetworkClientProcessing.SendChatMessage();
+    }
+
+    #endregion
 }

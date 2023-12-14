@@ -21,7 +21,7 @@ public class BoxBehaviour : MonoBehaviour
                 uiController.CheckForDraw();
             }
             uiController.lastButtonClicked = GetComponent<Button>();
-            uiController.didSelect = true;
+            NetworkClientProcessing.SendSelectionToOpponent();
         }
     }
 

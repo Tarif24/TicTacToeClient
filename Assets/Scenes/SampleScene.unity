@@ -1372,18 +1372,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
-        m_MethodName: SendUsernameAndPasswordToServer
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &272393723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2981,8 +2969,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
+      - m_Target: {fileID: 821942949}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: LogOut
         m_Mode: 1
         m_Arguments:
@@ -3117,18 +3105,6 @@ MonoBehaviour:
       - m_Target: {fileID: 821942949}
         m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: LoginButton
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
-        m_MethodName: SendUsernameAndPasswordToServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3284,6 +3260,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 791489f1962a0b246b80d3e8022f0009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentGameID: 
+  lastButtonClicked: {fileID: 0}
+  isNewAccount: 0
   loginPage: {fileID: 1937738585}
   enterGameID: {fileID: 1340039272}
   lookingForPlayer: {fileID: 245348421}
@@ -3292,8 +3271,6 @@ MonoBehaviour:
   lose: {fileID: 338837759}
   draw: {fileID: 129067921}
   finish: {fileID: 984160445}
-  isNewAccount: 0
-  currentGameID: 
   TopRow:
   - {fileID: 1371000489}
   - {fileID: 199630846}
@@ -3309,8 +3286,6 @@ MonoBehaviour:
   marker: X
   didWin: 0
   isDraw: 0
-  lastButtonClicked: {fileID: 0}
-  didSelect: 0
   textBox: {fileID: 358259446585837481, guid: 19779e63ae82d934c90cf7fbda8b917a, type: 3}
   chatLocation: {fileID: 2133372361}
   canvas: {fileID: 1659684373}
@@ -3918,8 +3893,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
+      - m_Target: {fileID: 821942949}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: SendChatMessage
         m_Mode: 1
         m_Arguments:
@@ -4051,8 +4026,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
+      - m_Target: {fileID: 821942949}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: SendBackOut
         m_Mode: 1
         m_Arguments:
@@ -4318,8 +4293,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
+      - m_Target: {fileID: 821942949}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: SendGameID
         m_Mode: 1
         m_Arguments:
@@ -6269,8 +6244,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 262339288}
-        m_TargetAssemblyTypeName: NetworkClient, Assembly-CSharp
+      - m_Target: {fileID: 821942949}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: SendBackOut
         m_Mode: 1
         m_Arguments:
